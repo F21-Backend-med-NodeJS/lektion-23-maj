@@ -11,15 +11,26 @@
  * URL: /api/todo/:id
  * Method: DELETE
  */
+
+/**
+ * /api/products - GET - Hämtar alla produkter
+ * 
+ * /api/cart - GET - Hämtar varukorgen
+ * /api/cart - POST - Lägger till i varukorgen
+ * /api/cart - DELETE - Ta bort från varukorgen
+ * 
+ * /api/order - POST - Lägger en order
+ * 
+ * /api/account/login
+ * /api/account/signup
+ * /api/account/info 
+ */
+
 const express = require('express');
 const app = express();
 const PORT = 8000;
-let todos = [
-    { todo: 'Köp kaffe', id: 0, done: false },
-    { todo: 'Köp kaka', id: 1, done: false },
-    { todo: 'Brygg kaffe', id: 2, done: false },
-    { todo: 'Drick kaffe', id: 3, done: false }
-];
+
+const todoRouter = require('./routes/todo');
 
 app.use(express.json());
 // En middleware körs innan ett request går in i en matchande route
@@ -28,56 +39,9 @@ app.use((request, response, next) => {
     console.log(`I en middleware innan route ${request.url} och metod: ${request.method}`);
     next();
 });
-
-app.get('/api/todo', (request, response) => {
-    console.log('I get todos');
-    const resObj = {
-        todos: todos
-    }
-
-    response.json(resObj);
-});
-
-app.post('/api/todo', (request, response) => {
-    const todo = request.body;
-    if(todo.hasOwnProperty('todo') && todo.hasOwnProperty('id')
-        && todo.hasOwnProperty('done')) {
-        console.log(todo);
-        todos.push(todo);
-
-        const resObj = {
-            success: true,
-            todos: todos
-        }
-
-        response.json(resObj);
-    } else {
-        const resObj = {
-            success: false,
-            message: 'Invalid body'
-        }
-
-        response.status(400).json(resObj);
-    }
-});
-
-app.delete('/api/todo/:id', (request, response) => {
-    const id = request.params.id;
-    console.log('ID:', typeof id);
-
-    todos = todos.filter((todo) => {
-        if (todo.id !== Number(id)) {
-            return todo;
-        }
-    });
-
-    const resObj = {
-        success: true,
-        todos: todos
-    }
-
-    response.json(resObj);
-});
+//Sätt en basurl till alla routes så alla startar med /api/todo
+//Sen säg att det är de routes som ligger i todoRouter som kopplas till denna basurl
+app.use('/api/todo', todoRouter);
 
 app.use((request, response) => {
     const resObj = {
